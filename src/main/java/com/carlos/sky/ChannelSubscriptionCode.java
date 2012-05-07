@@ -4,5 +4,6 @@ public enum ChannelSubscriptionCode {
     SPORTS,
     KIDS,
     NEWS,
-    MUSIC;
+    MUSIC,
+    MOVIES;
 }

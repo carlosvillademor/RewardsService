@@ -13,6 +13,7 @@ import java.util.List;
 import static com.carlos.sky.ChannelSubscriptionCode.*;
 import static com.carlos.sky.Reward.CHAMPIONS_LEAGUE_FINAL_TICKET;
 import static com.carlos.sky.Reward.KARAOKE_PRO_MICROPHONE;
+import static com.carlos.sky.Reward.PIRATES_OF_THE_CARIBBEAN_COLLECTION;
 import static java.util.Arrays.asList;
 import static java.util.Collections.EMPTY_LIST;
 import static org.hamcrest.Matchers.is;
@@ -122,6 +123,19 @@ public class RewardsServiceTest {
         //Then
         assertThat(rewards.size(), is(2));
         assertThat(rewards.containsAll(asList(CHAMPIONS_LEAGUE_FINAL_TICKET, KARAOKE_PRO_MICROPHONE)), is(true));
+    }
+
+    @Test
+    public void MoviesChannelsAddRewardsToCustomers() throws TechnicalFailureException {
+        //Given
+        accountNumber = 12345L;
+        channelSubscriptions = createChannelSubscriptions(asList(MOVIES, MUSIC, SPORTS));
+        when(eligibilityService.isEligible(accountNumber)).thenReturn(true);
+        //When
+        List<Reward> rewards = rewardsService.getRewards(accountNumber, channelSubscriptions);
+        //Then
+        assertThat(rewards.size(), is(3));
+        assertThat(rewards.containsAll(asList(PIRATES_OF_THE_CARIBBEAN_COLLECTION, CHAMPIONS_LEAGUE_FINAL_TICKET, KARAOKE_PRO_MICROPHONE)), is(true));
     }
 
     private List<ChannelSubscriptionCode> createChannelSubscriptions(List<ChannelSubscriptionCode> channelSubscriptionCodes) {
