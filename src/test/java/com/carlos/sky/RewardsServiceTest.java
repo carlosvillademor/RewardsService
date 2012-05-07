@@ -7,17 +7,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.carlos.sky.ChannelSubscriptionCode.*;
-import static com.carlos.sky.Reward.CHAMPIONS_LEAGUE_FINAL_TICKET;
-import static com.carlos.sky.Reward.KARAOKE_PRO_MICROPHONE;
-import static com.carlos.sky.Reward.PIRATES_OF_THE_CARIBBEAN_COLLECTION;
+import static com.carlos.sky.Reward.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.EMPTY_LIST;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,7 +35,7 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void givenAccountNumberAndSubscriptionsWhenGettingRewardsThenItShouldDelegateToEligibilityServiceToDecideIfUserIsEligible() throws TechnicalFailureException {
+    public void givenAccountNumberAndSubscriptionsWhenGettingRewardsThenItShouldDelegateToEligibilityServiceToDecideIfUserIsEligible() throws TechnicalFailureException, InvalidAccountNumberException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions(asList(SPORTS));
@@ -50,7 +46,7 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void givenCustomerIsNotEligibleNoRewardsAreReturned() throws TechnicalFailureException {
+    public void givenCustomerIsNotEligibleNoRewardsAreReturned() throws TechnicalFailureException, InvalidAccountNumberException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions(asList(SPORTS));
@@ -62,7 +58,7 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void givenTechnicalFailureOnEligibilityServiceNoRewardsAreReturned() throws TechnicalFailureException {
+    public void givenTechnicalFailureOnEligibilityServiceNoRewardsAreReturned() throws TechnicalFailureException, InvalidAccountNumberException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions(asList(SPORTS));
@@ -74,7 +70,7 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void givenCustomerIsEligibleRewardsAreReturnedBasedOnTheirSubscription() throws TechnicalFailureException {
+    public void givenCustomerIsEligibleRewardsAreReturnedBasedOnTheirSubscription() throws TechnicalFailureException, InvalidAccountNumberException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions(asList(SPORTS));
@@ -87,7 +83,7 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void KidsChannelsDoNotAddRewardsToCustomers() throws TechnicalFailureException {
+    public void KidsChannelsDoNotAddRewardsToCustomers() throws TechnicalFailureException, InvalidAccountNumberException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions(asList(KIDS, SPORTS));
@@ -100,7 +96,7 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void NewsChannelsDoNotAddRewardsToCustomers() throws TechnicalFailureException {
+    public void NewsChannelsDoNotAddRewardsToCustomers() throws TechnicalFailureException, InvalidAccountNumberException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions(asList(NEWS, SPORTS));
@@ -113,7 +109,7 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void MusicChannelsAddRewardsToCustomers() throws TechnicalFailureException {
+    public void MusicChannelsAddRewardsToCustomers() throws TechnicalFailureException, InvalidAccountNumberException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions(asList(MUSIC, SPORTS));
@@ -126,7 +122,7 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void MoviesChannelsAddRewardsToCustomers() throws TechnicalFailureException {
+    public void MoviesChannelsAddRewardsToCustomers() throws TechnicalFailureException, InvalidAccountNumberException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions(asList(MOVIES, MUSIC, SPORTS));
@@ -136,6 +132,21 @@ public class RewardsServiceTest {
         //Then
         assertThat(rewards.size(), is(3));
         assertThat(rewards.containsAll(asList(PIRATES_OF_THE_CARIBBEAN_COLLECTION, CHAMPIONS_LEAGUE_FINAL_TICKET, KARAOKE_PRO_MICROPHONE)), is(true));
+    }
+
+    @Test
+    public void givenInvalidCustomerNumberNoSubscriptionsAreReturnedAndUserIsNotified() throws TechnicalFailureException, InvalidAccountNumberException {
+        //Given
+        accountNumber = 12345L;
+        channelSubscriptions = createChannelSubscriptions(asList(MOVIES, MUSIC, SPORTS));
+        when(eligibilityService.isEligible(accountNumber)).thenThrow(InvalidAccountNumberException.class);
+        //When
+        try {
+            rewardsService.getRewards(accountNumber, channelSubscriptions);
+        } catch (InvalidAccountNumberException exception) {
+            //Then
+            assertThat(exception.getMessage(), is("Invalid account number"));
+        }
     }
 
     private List<ChannelSubscriptionCode> createChannelSubscriptions(List<ChannelSubscriptionCode> channelSubscriptionCodes) {

@@ -12,21 +12,24 @@ import static com.carlos.sky.Reward.PIRATES_OF_THE_CARIBBEAN_COLLECTION;
 
 public class RewardsService implements RewardsServiceInterface {
 
+    public static final String INVALID_ACCOUNT_NUMBER = "Invalid account number";
     private EligibilityServiceInterface eligibilityService;
 
     public RewardsService(EligibilityServiceInterface eligibilityService) {
         this.eligibilityService = eligibilityService;
     }
 
-    public List<Reward> getRewards(Long accountNumber, List<ChannelSubscriptionCode> channelSubscriptions) {
+    public List<Reward> getRewards(Long accountNumber, List<ChannelSubscriptionCode> channelSubscriptions) throws InvalidAccountNumberException {
         List<Reward> rewards = new ArrayList<Reward>();
         try {
             if (!eligibilityService.isEligible(accountNumber)) {
                 return rewards;
             }
-            rewards = mapRewards(channelSubscriptions);
-        } finally {
+            return mapRewards(channelSubscriptions);
+        } catch (TechnicalFailureException technicalException) {
             return rewards;
+        } catch (InvalidAccountNumberException invalidAccountNumberException) {
+            throw new InvalidAccountNumberException(INVALID_ACCOUNT_NUMBER, invalidAccountNumberException);
         }
     }
 
@@ -35,9 +38,9 @@ public class RewardsService implements RewardsServiceInterface {
         for (ChannelSubscriptionCode channelSubscription : channelSubscriptions) {
             if (SPORTS.equals(channelSubscription)) {
                 rewards.add(CHAMPIONS_LEAGUE_FINAL_TICKET);
-            }else if (MUSIC.equals(channelSubscription)) {
+            } else if (MUSIC.equals(channelSubscription)) {
                 rewards.add(KARAOKE_PRO_MICROPHONE);
-            }   else if (MOVIES.equals(channelSubscription)) {
+            } else if (MOVIES.equals(channelSubscription)) {
                 rewards.add(PIRATES_OF_THE_CARIBBEAN_COLLECTION);
             }
         }
