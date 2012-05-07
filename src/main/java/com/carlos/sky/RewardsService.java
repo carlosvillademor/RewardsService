@@ -3,6 +3,10 @@ package com.carlos.sky;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.carlos.sky.ChannelSubscriptionCode.SPORTS;
+import static com.carlos.sky.Reward.CHAMPIONS_LEAGUE_FINAL_TICKET;
+import static com.carlos.sky.Reward.KARAOKE_PRO_MICROPHONE;
+
 public class RewardsService implements RewardsServiceInterface {
 
     private EligibilityServiceInterface eligibilityService;
@@ -26,8 +30,10 @@ public class RewardsService implements RewardsServiceInterface {
     private List<Reward> mapRewards(List<ChannelSubscriptionCode> channelSubscriptions) {
         List<Reward> rewards = new ArrayList<Reward>();
         for (ChannelSubscriptionCode channelSubscription : channelSubscriptions) {
-            if (ChannelSubscriptionCode.SPORTS.equals(channelSubscription)) {
-                rewards.add(Reward.CHAMPIONS_LEAGUE_FINAL_TICKET);
+            if (SPORTS.equals(channelSubscription)) {
+                rewards.add(CHAMPIONS_LEAGUE_FINAL_TICKET);
+            }else if (ChannelSubscriptionCode.MUSIC.equals(channelSubscription)) {
+                rewards.add((KARAOKE_PRO_MICROPHONE));
             }
         }
         return rewards;
