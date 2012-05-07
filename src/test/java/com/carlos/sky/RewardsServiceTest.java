@@ -7,10 +7,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static com.carlos.sky.Reward.CHAMPIONS_LEAGUE_FINAL_TICKET;
+import static java.util.Arrays.asList;
 import static java.util.Collections.EMPTY_LIST;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,7 +39,7 @@ public class RewardsServiceTest {
     public void givenAccountNumberAndSubscriptionsWhenGettingRewardsThenItShouldDelegateToEligibilityServiceToDecideIfUserIsEligible() throws TechnicalFailureException {
         //Given
         accountNumber = 12345L;
-        channelSubscriptions = createChannelSubscriptions();
+        channelSubscriptions = createChannelSubscriptions(asList(ChannelSubscriptionCode.SPORTS));
         //When
         rewardsService.getRewards(accountNumber, channelSubscriptions);
         //Then
@@ -46,7 +50,7 @@ public class RewardsServiceTest {
     public void givenCustomerIsNotEligibleNoRewardsAreReturned() throws TechnicalFailureException {
         //Given
         accountNumber = 12345L;
-        channelSubscriptions = createChannelSubscriptions();
+        channelSubscriptions = createChannelSubscriptions(asList(ChannelSubscriptionCode.SPORTS));
         when(eligibilityService.isEligible(accountNumber)).thenReturn(false);
         //When
         List<Reward> rewards = rewardsService.getRewards(accountNumber, channelSubscriptions);
@@ -58,7 +62,7 @@ public class RewardsServiceTest {
     public void givenTechnicalFailureOnEligibilityServiceNoRewardsAreReturned() throws TechnicalFailureException {
         //Given
         accountNumber = 12345L;
-        channelSubscriptions = createChannelSubscriptions();
+        channelSubscriptions = createChannelSubscriptions(asList(ChannelSubscriptionCode.SPORTS));
         when(eligibilityService.isEligible(accountNumber)).thenThrow(TechnicalFailureException.class);
         //When
         List<Reward> rewards = rewardsService.getRewards(accountNumber, channelSubscriptions);
@@ -66,9 +70,24 @@ public class RewardsServiceTest {
         assertThat(rewards, is(EMPTY_LIST));
     }
 
-    private List<ChannelSubscriptionCode> createChannelSubscriptions() {
+    @Test
+    public void givenCustomerIsEligibleRewardsAreReturnedBasedOnTheirSubscription() throws TechnicalFailureException {
+        //Given
+        accountNumber = 12345L;
+        channelSubscriptions = createChannelSubscriptions(asList(ChannelSubscriptionCode.SPORTS));
+        when(eligibilityService.isEligible(accountNumber)).thenReturn(true);
+        //When
+        List<Reward> rewards = rewardsService.getRewards(accountNumber, channelSubscriptions);
+        //Then
+        assertThat(rewards.size(), is(1));
+        assertThat(rewards.get(0), is(CHAMPIONS_LEAGUE_FINAL_TICKET));
+    }
+
+    private List<ChannelSubscriptionCode> createChannelSubscriptions(List<ChannelSubscriptionCode> channelSubscriptionCodes) {
         List<ChannelSubscriptionCode> channelSubscriptions = new ArrayList<ChannelSubscriptionCode>();
-        channelSubscriptions.add(ChannelSubscriptionCode.SPORTS);
+        for (ChannelSubscriptionCode channelSubscriptionCode : channelSubscriptionCodes) {
+            channelSubscriptions.add(channelSubscriptionCode);
+        }
         return channelSubscriptions;
     }
 
