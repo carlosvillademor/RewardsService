@@ -32,7 +32,7 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void givenAccountNumberAndSubscriptionsWhenGettingRewardsThenItShouldDelegateToEligibilityServiceToDecideIfUserIsEligible() {
+    public void givenAccountNumberAndSubscriptionsWhenGettingRewardsThenItShouldDelegateToEligibilityServiceToDecideIfUserIsEligible() throws TechnicalFailureException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions();
@@ -43,11 +43,23 @@ public class RewardsServiceTest {
     }
 
     @Test
-    public void givenCustomerIsNotElibibleNoRewardsAreReturned() {
+    public void givenCustomerIsNotEligibleNoRewardsAreReturned() throws TechnicalFailureException {
         //Given
         accountNumber = 12345L;
         channelSubscriptions = createChannelSubscriptions();
         when(eligibilityService.isEligible(accountNumber)).thenReturn(false);
+        //When
+        List<Reward> rewards = rewardsService.getRewards(accountNumber, channelSubscriptions);
+        //Then
+        assertThat(rewards, is(EMPTY_LIST));
+    }
+
+    @Test
+    public void givenTechnicalFailureOnEligibilityServiceNoRewardsAreReturned() throws TechnicalFailureException {
+        //Given
+        accountNumber = 12345L;
+        channelSubscriptions = createChannelSubscriptions();
+        when(eligibilityService.isEligible(accountNumber)).thenThrow(TechnicalFailureException.class);
         //When
         List<Reward> rewards = rewardsService.getRewards(accountNumber, channelSubscriptions);
         //Then

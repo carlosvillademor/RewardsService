@@ -13,10 +13,13 @@ public class RewardsService implements RewardsServiceInterface {
 
     public List<Reward> getRewards(Long accountNumber, List<ChannelSubscriptionCode> channelSubscriptions) {
         List<Reward> rewards = new ArrayList<Reward>();
-        if (!eligibilityService.isEligible(accountNumber)) {
+        try {
+            if (!eligibilityService.isEligible(accountNumber)) {
+                return rewards;
+            }
+        } finally {
             return rewards;
         }
-        return rewards;
     }
 
 }
