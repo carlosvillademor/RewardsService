@@ -9,7 +9,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.EMPTY_LIST;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RewardsServiceTest {
@@ -36,6 +40,18 @@ public class RewardsServiceTest {
         rewardsService.getRewards(accountNumber, channelSubscriptions);
         //Then
         verify(eligibilityService).isEligible(accountNumber);
+    }
+
+    @Test
+    public void givenCustomerIsNotElibibleNoRewardsAreReturned() {
+        //Given
+        accountNumber = 12345L;
+        channelSubscriptions = createChannelSubscriptions();
+        when(eligibilityService.isEligible(accountNumber)).thenReturn(false);
+        //When
+        List<Reward> rewards = rewardsService.getRewards(accountNumber, channelSubscriptions);
+        //Then
+        assertThat(rewards, is(EMPTY_LIST));
     }
 
     private List<ChannelSubscriptionCode> createChannelSubscriptions() {

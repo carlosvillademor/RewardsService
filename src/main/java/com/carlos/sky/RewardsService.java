@@ -1,5 +1,6 @@
 package com.carlos.sky;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RewardsService implements RewardsServiceInterface {
@@ -11,8 +12,11 @@ public class RewardsService implements RewardsServiceInterface {
     }
 
     public List<Reward> getRewards(Long accountNumber, List<ChannelSubscriptionCode> channelSubscriptions) {
-        eligibilityService.isEligible(accountNumber);
-        return null;
+        List<Reward> rewards = new ArrayList<Reward>();
+        if (!eligibilityService.isEligible(accountNumber)) {
+            return rewards;
+        }
+        return rewards;
     }
 
 }
